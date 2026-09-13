@@ -1,0 +1,566 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="robots" content="noindex, nofollow, noarchive, nositelinkssearchbox">
+<meta name="googlebot" content="noindex, nofollow">
+<meta name="referrer" content="no-referrer">
+<title>日本北陸・京阪 9天8夜｜2026/9/20–9/28</title>
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<style>
+:root{
+  --bg:#f6f3ee; --card:#fff; --ink:#2b2622; --sub:#7a716a;
+  --line:#e5ded4; --accent:#c1553f; --accent-soft:#fbeeea;
+  --ok:#3f7d5c; --warn:#b8862a; --warn-soft:#fdf3dd;
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html{-webkit-text-size-adjust:100%}
+body{
+  margin:0;background:var(--bg);color:var(--ink);
+  font-family:-apple-system,BlinkMacSystemFont,"PingFang TC","Noto Sans TC","Hiragino Sans",sans-serif;
+  font-size:17px;line-height:1.75;
+}
+.wrap{max-width:760px;margin:0 auto;padding:0 16px 96px}
+
+/* ── header ── */
+header{background:linear-gradient(160deg,#c1553f,#8f3a2c);color:#fff;padding:28px 16px 24px;text-align:center}
+header .kicker{font-size:14px;letter-spacing:.22em;opacity:.82;margin-bottom:8px}
+header h1{margin:0;font-size:27px;font-weight:800;letter-spacing:.02em;line-height:1.35}
+header .sub{margin-top:10px;font-size:15px;opacity:.9}
+header .stamp{margin-top:14px;display:inline-block;font-size:13px;background:rgba(255,255,255,.18);
+  padding:5px 14px;border-radius:999px}
+
+/* ── nav ── */
+nav{position:sticky;top:0;z-index:900;background:rgba(246,243,238,.96);
+  backdrop-filter:saturate(180%) blur(12px);border-bottom:1px solid var(--line)}
+nav .inner{max-width:760px;margin:0 auto;display:flex;gap:6px;padding:9px 12px;overflow-x:auto;
+  scrollbar-width:none}
+nav .inner::-webkit-scrollbar{display:none}
+nav button{flex:0 0 auto;border:1px solid var(--line);background:#fff;color:var(--sub);
+  font-size:15px;font-weight:600;padding:8px 15px;border-radius:999px;cursor:pointer;
+  font-family:inherit}
+nav button.on{background:var(--accent);border-color:var(--accent);color:#fff}
+
+section{display:none;padding-top:22px}
+section.on{display:block}
+
+h2{font-size:20px;margin:30px 0 12px;display:flex;align-items:center;gap:9px}
+h2:first-child{margin-top:6px}
+h2 .bar{width:5px;height:21px;background:var(--accent);border-radius:3px}
+
+.hint{background:var(--accent-soft);border:1px solid #f0d9d2;border-radius:14px;
+  padding:13px 16px;font-size:15px;color:#8f3a2c;margin:18px 0}
+
+/* ── day card ── */
+.day{background:var(--card);border:1px solid var(--line);border-radius:18px;
+  margin-bottom:18px;overflow:hidden;box-shadow:0 1px 3px rgba(0,0,0,.04)}
+.day-head{padding:16px 18px;display:flex;align-items:center;gap:14px;
+  border-bottom:1px solid var(--line)}
+.badge{flex:0 0 auto;width:52px;height:52px;border-radius:14px;display:flex;
+  flex-direction:column;align-items:center;justify-content:center;color:#fff;line-height:1.1}
+.badge b{font-size:17px;font-weight:800}
+.badge span{font-size:11px;opacity:.9}
+.day-head .t{flex:1;min-width:0}
+.day-head .t h3{margin:0;font-size:18px;font-weight:700}
+.day-head .t p{margin:3px 0 0;font-size:14px;color:var(--sub)}
+.day-body{padding:6px 18px 16px}
+
+.tl{list-style:none;margin:0;padding:0}
+.tl li{position:relative;padding:13px 0 13px 30px;border-bottom:1px dashed #eee5da}
+.tl li:last-child{border-bottom:0}
+.tl li::before{content:"";position:absolute;left:5px;top:21px;width:9px;height:9px;
+  border-radius:50%;background:#d8cec2}
+.tl li::after{content:"";position:absolute;left:9px;top:30px;bottom:-13px;width:1px;background:#eee5da}
+.tl li:last-child::after{display:none}
+.tl .time{font-size:13px;font-weight:700;color:var(--accent);letter-spacing:.03em}
+.tl .ttl{font-size:17px;font-weight:600;margin-top:1px}
+.tl .desc{font-size:14.5px;color:var(--sub);margin-top:3px}
+
+.tag{display:inline-block;font-size:12px;font-weight:700;padding:2px 8px;border-radius:6px;
+  margin-left:6px;vertical-align:2px}
+.tag.q{background:var(--warn-soft);color:var(--warn);border:1px solid #eedca6}
+.tag.b{background:#e7f1ea;color:var(--ok);border:1px solid #c8e0d2}
+
+.stay{margin:14px 18px 16px;background:#faf7f2;border:1px solid var(--line);
+  border-radius:12px;padding:11px 14px;font-size:15px}
+.stay b{color:var(--accent)}
+
+/* ── map ── */
+#map{height:460px;border-radius:18px;border:1px solid var(--line);margin-top:6px;z-index:1}
+.chips{display:flex;gap:7px;overflow-x:auto;padding:4px 0 12px;scrollbar-width:none}
+.chips::-webkit-scrollbar{display:none}
+.chips button{flex:0 0 auto;border:none;color:#fff;font-size:14px;font-weight:700;
+  padding:7px 13px;border-radius:999px;cursor:pointer;opacity:.42;font-family:inherit}
+.chips button.on{opacity:1}
+.pin{display:flex;align-items:center;justify-content:center;color:#fff;font-weight:800;
+  font-size:12px;border-radius:50%;border:2.5px solid #fff;box-shadow:0 1px 4px rgba(0,0,0,.35)}
+.leaflet-popup-content{font-family:inherit;font-size:15px;margin:11px 14px;line-height:1.6}
+.leaflet-popup-content b{display:block;font-size:16px}
+.leaflet-popup-content small{color:var(--sub)}
+
+/* ── table-ish list ── */
+.rows{background:var(--card);border:1px solid var(--line);border-radius:16px;overflow:hidden}
+.row{display:flex;gap:12px;padding:13px 16px;border-bottom:1px solid var(--line);font-size:15.5px}
+.row:last-child{border-bottom:0}
+.row .k{flex:0 0 82px;font-weight:700;color:var(--sub);font-size:14.5px}
+.row .v{flex:1;min-width:0}
+.row .v small{display:block;color:var(--sub);font-size:13.5px;margin-top:2px}
+
+/* ── packing ── */
+.pack{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:6px 18px 14px;margin-bottom:16px}
+.pack h4{font-size:16.5px;margin:14px 0 8px;display:flex;align-items:center;gap:8px}
+.pack ul{margin:0;padding-left:20px}
+.pack li{margin:6px 0;font-size:15.5px}
+.pack li small{color:var(--sub)}
+.temp{display:flex;gap:10px;flex-wrap:wrap;margin:10px 0 4px}
+.temp div{flex:1 1 150px;background:#faf7f2;border:1px solid var(--line);border-radius:12px;
+  padding:11px 13px}
+.temp b{display:block;font-size:15px}
+.temp span{font-size:14px;color:var(--sub)}
+.temp em{display:block;font-style:normal;font-size:21px;font-weight:800;color:var(--accent);margin:3px 0}
+
+footer{text-align:center;font-size:13px;color:var(--sub);padding:26px 16px 0}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="kicker">JAPAN 2026</div>
+  <h1>北陸・京都・大阪<br>9 天 8 夜</h1>
+  <div class="sub">9/20（日）～ 9/28（一）　小松進・大阪出</div>
+  <div class="stamp" id="countdown"></div>
+</header>
+
+<nav><div class="inner">
+  <button class="on" data-s="plan">每日行程</button>
+  <button data-s="map">地圖</button>
+  <button data-s="stay">住宿・交通</button>
+  <button data-s="pack">穿著・打包</button>
+  <button data-s="todo">待確認</button>
+</div></nav>
+
+<div class="wrap">
+
+<!-- ══════════ 行程 ══════════ -->
+<section id="plan" class="on">
+  <div class="hint">📖 由上往下就是每天的順序。標 <span class="tag q">待確認</span> 的地方是還沒定案的，之後會再更新。這個網頁只要重新整理就會是最新版。</div>
+  <div id="days"></div>
+</section>
+
+<!-- ══════════ 地圖 ══════════ -->
+<section id="map-sec">
+  <h2><i class="bar"></i>每天在哪裡</h2>
+  <div class="hint">🗺️ 點下面的日期按鈕可以只看那一天；點地圖上的圓點會顯示地名。整體路線是<b>小松 → 高山 → 能登半島 → 加賀 → 京都 → 大阪</b>。</div>
+  <div class="chips" id="chips"></div>
+  <div id="map"></div>
+  <h2><i class="bar"></i>每日區域一覽</h2>
+  <div class="rows" id="areas"></div>
+</section>
+
+<!-- ══════════ 住宿 ══════════ -->
+<section id="stay">
+  <h2><i class="bar"></i>住宿（8 晚）</h2>
+  <div class="rows" id="hotels"></div>
+  <h2><i class="bar"></i>交通</h2>
+  <div class="rows">
+    <div class="row"><div class="k">去程</div><div class="v">9/20　06:35 起飛 → 10:25 抵達小松機場（KMQ）<small>建議 9/19 晚上早點睡，當天要很早出門</small></div></div>
+    <div class="row"><div class="k">租車</div><div class="v">9/20–9/23　小松機場取還車（Klook 已付，含基本險）<small>9/23 下午在小松市區還車，之後改搭大眾運輸</small></div></div>
+    <div class="row"><div class="k">IC 卡</div><div class="v">ICOCA / Suica　抵達後購買<small>電車、公車、便利商店、自動販賣機都能刷，非常方便</small></div></div>
+    <div class="row"><div class="k">長程移動</div><div class="v">9/24　加賀溫泉 → 北陸新幹線至敦賀 → 轉 JR → 京都</div></div>
+    <div class="row"><div class="k">京都→大阪</div><div class="v">9/26　JR 或阪急，約 30–45 分鐘</div></div>
+    <div class="row"><div class="k">回程</div><div class="v">9/28　23:35 關西機場起飛<small>21:00 前抵達機場，可先在機場吃晚餐、逛免稅店</small></div></div>
+  </div>
+</section>
+
+<!-- ══════════ 打包 ══════════ -->
+<section id="pack">
+  <h2><i class="bar"></i>天氣與穿著</h2>
+  <div class="hint">🌡️ 這趟<b>溫差很大</b>。京都大阪還是夏天尾巴（白天近 30 度會流汗），但上高地在海拔 1,500 公尺，早上只有 5–10 度。<b>洋蔥式穿法</b>最保險：短袖或薄長袖打底，外面加一件可以隨時穿脫的外套。</div>
+  <div class="temp">
+    <div><b>高山・白川鄉</b><em>13–24°C</em><span>9/20–9/21　早晚涼，要外套</span></div>
+    <div><b>上高地（高山區）</b><em>5–18°C</em><span>9/21　清晨很冷，必備厚外套</span></div>
+    <div><b>能登・加賀</b><em>19–26°C</em><span>9/22–9/24　海邊風大</span></div>
+    <div><b>京都・大阪</b><em>21–30°C</em><span>9/24–9/28　悶熱，防曬要做</span></div>
+  </div>
+
+  <div class="pack">
+    <h4>👕 衣服這樣帶</h4>
+    <ul>
+      <li><b>短袖上衣 4–5 件</b><small>京都大阪白天很熱，一天可能要換</small></li>
+      <li><b>薄長袖 2 件</b><small>當內搭，早晚溫差時很好用</small></li>
+      <li><b>保暖外套 1 件（重點）</b><small>刷毛或輕羽絨。9/21 上高地清晨只有 5–10 度，一定會用到</small></li>
+      <li><b>薄外套／防風外套 1 件</b><small>能登海邊風大，京都晚上也用得到</small></li>
+      <li><b>長褲 2–3 條</b><small>好走、不緊的最好。上高地建議穿長褲</small></li>
+      <li><b>免洗內衣褲、襪子</b><small>行李可以少帶一點，回程好裝戰利品</small></li>
+      <li><b>泡湯用品</b><small>9/23 住溫泉飯店，浴衣毛巾飯店都有。女生可帶髮圈、小包面膜</small></li>
+    </ul>
+    <h4>👟 鞋子</h4>
+    <ul>
+      <li><b>好走的布鞋／健走鞋（最重要）</b><small>上高地要走 1–2 小時平路、京都大阪一天走一萬步以上。千萬不要穿新鞋</small></li>
+      <li>飯店拖鞋房間都有，不用另外帶</li>
+    </ul>
+  </div>
+
+  <div class="pack">
+    <h4>🎒 隨身一定要帶</h4>
+    <ul>
+      <li><b>護照</b>（效期要超過 6 個月）、<b>登機證／訂位紀錄</b></li>
+      <li><b>日幣現金</b><small>能登半島、白川鄉的小店、停車場常常只收現金，建議每人身上有一點</small></li>
+      <li><b>信用卡</b>（建議帶兩張不同家的備用）</li>
+      <li><b>ICOCA / Suica</b>（抵達後買，之後搭車都靠它）</li>
+      <li><b>行動電源 + 充電線</b><small>行動電源只能放隨身行李，不可託運</small></li>
+      <li><b>雨傘或輕便雨衣</b><small>9 月日本還在颱風季，山區天氣說變就變</small></li>
+    </ul>
+    <h4>💊 藥品（爸媽特別注意）</h4>
+    <ul>
+      <li><b>平常在吃的慢性病藥</b><small>帶足全程 + 多 3 天的份量，放隨身行李不要託運</small></li>
+      <li><b>暈車藥</b><small>能登半島與上高地都是山路、彎道多，會暈車的先吃</small></li>
+      <li>腸胃藥、止痛藥、感冒藥、OK 繃、痠痛貼布</li>
+      <li>健保卡、常用藥清單（萬一需要看醫生）</li>
+    </ul>
+    <h4>🧳 其他好用的</h4>
+    <ul>
+      <li><b>插頭不用轉接</b><small>日本是兩孔扁插，台灣插頭可以直接用，電壓 100V 也沒問題</small></li>
+      <li>網路：手機網卡或分享器（出發前先裝好）</li>
+      <li>輕便水壺／保溫瓶、環保購物袋（日本塑膠袋要錢）</li>
+      <li>太陽眼鏡、帽子、防曬乳</li>
+      <li>小零錢包（日本硬幣很多）</li>
+      <li>行李秤（回程買太多才不會超重）</li>
+    </ul>
+  </div>
+</section>
+
+<!-- ══════════ 待確認 ══════════ -->
+<section id="todo">
+  <h2><i class="bar"></i>還沒定案的事</h2>
+  <div class="hint">⚠️ 這些是目前還沒確定的部分，確定之後我會更新這個網頁，爸媽重新整理就會看到新的。</div>
+  <div class="rows" id="todos"></div>
+  <h2><i class="bar"></i>已經訂好、付過錢的</h2>
+  <div class="rows" id="booked"></div>
+</section>
+
+<footer>最後更新：<span id="upd"></span>　·　資料如有調整會直接更新在這一頁</footer>
+</div>
+
+<script>
+/* ══════════════════════════════════════════
+   行程資料 — 要改內容改這裡就好
+   ══════════════════════════════════════════ */
+const DAYS = [
+{
+  n:1, date:'9/20', dow:'日', color:'#c1553f',
+  title:'抵達小松 → 白川鄉 → 高山',
+  area:'小松機場・白川鄉合掌村・高山',
+  stay:'高山　一間茶旅館',
+  items:[
+    {t:'06:35',h:'桃園機場出發',d:'航班 06:35 起飛，10:25 抵達小松機場'},
+    {t:'中午',h:'小松機場｜取車・買 IC 卡',d:'領行李後辦租車手續（約 12:00），順便買 ICOCA / Suica'},
+    {t:'午餐',h:'小松市區用餐',d:'小松名物是「小松烏龍麵」。店家還沒選定',q:1},
+    {t:'14:30',h:'白川鄉 合掌村',d:'世界遺產。從小松開車約 1.5 小時'},
+    {t:'',h:'城山天守閣展望台',d:'俯瞰整片合掌屋聚落的經典角度，明信片畫面就在這裡。可搭接駁車上去，也可以走路（上坡約 20 分鐘）'},
+    {t:'16:00',h:'離開白川鄉 → 高山',d:'車程約 1 小時，走東海北陸道'},
+    {t:'17:00',h:'高山　飯店 Check in',d:'一間茶旅館'},
+    {t:'晚餐',h:'飛驒牛燒肉',d:'高山必吃。晚上可以順道走走高山老街（部分店家較早關）'},
+    {t:'睡前',h:'買明天的早餐',d:'上高地山上店家少又貴，先在便利商店買好麵包飲料'}
+  ],
+  spots:[
+    {n:'小松機場',la:36.3946,lo:136.4075},
+    {n:'白川鄉 合掌村',la:36.2578,lo:136.9063},
+    {n:'城山天守閣展望台',la:36.2612,lo:136.9002},
+    {n:'高山（住宿・老街）',la:36.1428,lo:137.2536}
+  ]
+},
+{
+  n:2, date:'9/21', dow:'一', color:'#d97d3c',
+  title:'上高地一日（日本阿爾卑斯）',
+  area:'高山・平湯溫泉・上高地',
+  stay:'高山　一間茶旅館（連住第 2 晚）',
+  items:[
+    {t:'早上',h:'開車前往平湯溫泉',d:'從高山出發約 40 分鐘。上高地全年禁止自用車進入，車要停在平湯的停車場'},
+    {t:'',h:'平湯溫泉 轉搭接駁巴士',d:'巴士約 25–30 分鐘直達上高地。班次不算密集，建議早點出發'},
+    {t:'上午',h:'上高地　河童橋・大正池',d:'海拔 1,500 公尺，穗高連峰倒映在梓川上。沿河散步道是平緩好走的木棧道，不用爬山',d2:1},
+    {t:'',h:'建議路線',d:'大正池 →（沿步道走約 1 小時）→ 河童橋 → 明神池（再走約 1 小時，體力許可再去）'},
+    {t:'午餐',h:'上高地山上簡單吃',d:'河童橋旁有幾間食堂與咖啡店，選擇少、價格偏高'},
+    {t:'下午',h:'原路搭巴士回平湯 → 開車回高山',d:'末班接駁車時間要先確認，不要錯過'},
+    {t:'晚餐',h:'高山市區晚餐',d:'飛驒牛壽司、高山中華そば（拉麵）都是名物。店家還沒選定',q:1}
+  ],
+  spots:[
+    {n:'高山（出發）',la:36.1428,lo:137.2536},
+    {n:'平湯溫泉 巴士轉運站',la:36.1806,lo:137.5570},
+    {n:'上高地 河童橋',la:36.2506,lo:137.6360},
+    {n:'上高地 大正池',la:36.2300,lo:137.6260}
+  ]
+},
+{
+  n:3, date:'9/22', dow:'二', color:'#b8862a',
+  title:'下山 → 羽咋 → 能登島',
+  area:'羽咋市・千里濱・能登島',
+  stay:'能登島　まひるのつき（夕陽沉入海的民宿）',
+  items:[
+    {t:'早上',h:'高山 Check out，開車下山',d:'高山 → 羽咋市 車程約 2.5 小時'},
+    {t:'午餐',h:'羽咋市用餐',d:'店家還沒選定',q:1},
+    {t:'下午',h:'千里濱渚海濱公路',d:'日本唯一可以開車開上沙灘的海岸線，約 8 公里。就在羽咋，順路必停'},
+    {t:'',h:'能登島西側沿海北上',d:'一路沿海景公路走，沿途小漁港與海岸風景'},
+    {t:'',h:'能登島大橋',d:'跨海大橋，橋上視野很好'},
+    {t:'傍晚',h:'民宿 Check in・看夕陽',d:'民宿主打「夕陽沉入海中」，記得抓好日落時間（9 月底約 17:50）',d2:1},
+    {t:'晚餐',h:'民宿內用餐',d:'海鮮為主'}
+  ],
+  spots:[
+    {n:'羽咋市',la:36.8944,lo:136.7743},
+    {n:'千里濱渚海濱公路',la:36.8580,lo:136.7570},
+    {n:'能登島大橋',la:37.0790,lo:136.9440},
+    {n:'能登島 民宿（位置待確認）',la:37.0950,lo:136.9700}
+  ]
+},
+{
+  n:4, date:'9/23', dow:'三', color:'#3f7d5c',
+  title:'能登半島環線 → 還車 → 加賀溫泉',
+  area:'輪島・珠洲・小松・加賀溫泉',
+  stay:'加賀溫泉　一泊二食溫泉飯店',
+  items:[
+    {t:'早上',h:'往北至輪島',d:'輪島朝市（早市，約 08:00–11:00）是能登最有名的市集'},
+    {t:'',h:'白米千枚田',d:'沿著海岸山坡層層疊疊的梯田，世界農業遺產'},
+    {t:'',h:'再從東側往南繞',d:'見附島（軍艦島）、戀路海岸等海岸景點，依時間彈性調整'},
+    {t:'15:00',h:'開回小松市區還車',d:'能登 → 小松 車程約 2–2.5 小時，要預留充裕時間'},
+    {t:'',h:'小松蛋糕店',d:'開車去買（店家名稱待確認）',q:1},
+    {t:'傍晚',h:'搭車前往加賀溫泉',d:'小松 → 加賀溫泉，JR 約 15 分鐘'},
+    {t:'',h:'加賀溫泉區散步',d:'山代溫泉／山中溫泉一帶，有古總湯、湯之曲輪等老街'},
+    {t:'晚餐',h:'飯店一泊二食',d:'高級溫泉旅館的會席料理，晚餐早餐都含在住宿裡'}
+  ],
+  spots:[
+    {n:'輪島朝市',la:37.3907,lo:136.8996},
+    {n:'白米千枚田',la:37.4128,lo:136.9702},
+    {n:'見附島',la:37.4148,lo:137.2900},
+    {n:'戀路海岸',la:37.3547,lo:137.2274},
+    {n:'小松市區（還車）',la:36.4113,lo:136.4453},
+    {n:'加賀溫泉・山代溫泉',la:36.2967,lo:136.3600}
+  ]
+},
+{
+  n:5, date:'9/24', dow:'四', color:'#4a7ba6',
+  title:'福井 → 新幹線 → 京都',
+  area:'福井・敦賀・京都東山',
+  stay:'京都　M\u2019s 飯店',
+  items:[
+    {t:'早上',h:'溫泉飯店 Check out'},
+    {t:'',h:'中途停福井',d:'福井車站前有超大隻的恐龍模型（會動），福井名物是「醬汁豬排丼」',q:1},
+    {t:'',h:'搭車前往京都',d:'北陸新幹線到敦賀 → 轉 JR 特急雷鳥號 → 京都。全程約 2.5–3 小時'},
+    {t:'下午',h:'京都 飯店 Check in'},
+    {t:'',h:'清水寺',d:'京都最有名的寺院。沿路二年坂、三年坂的石板坡道很有味道（坡度較陡，慢慢走）',d2:1},
+    {t:'傍晚',h:'花見小路・祇園',d:'從清水寺走過來約 20 分鐘。傍晚點燈後最美，運氣好會遇到藝妓'},
+    {t:'晚餐',h:'祇園一帶',d:'店家還沒選定',q:1}
+  ],
+  spots:[
+    {n:'福井車站（恐龍・豬排丼）',la:36.0618,lo:136.2231},
+    {n:'敦賀站（轉車）',la:35.6455,lo:136.0762},
+    {n:'京都車站',la:34.9858,lo:135.7588},
+    {n:'清水寺',la:34.9949,lo:135.7850},
+    {n:'花見小路・祇園',la:34.9998,lo:135.7752}
+  ]
+},
+{
+  n:6, date:'9/25', dow:'五', color:'#6b6bae',
+  title:'保津川遊船 → 嵐山 → 金閣寺 → 伏見稻荷',
+  area:'龜岡・嵐山・金閣寺・伏見',
+  stay:'京都　M\u2019s 飯店（連住第 2 晚）',
+  items:[
+    {t:'10:00',h:'保津川遊船（已訂）',d:'KKday 已訂，NT$3,573。搭 JR 到龜岡約 30 分鐘，從龜岡搭船順流而下，約 2 小時，下船地點剛好就在嵐山',b:1},
+    {t:'',h:'注意事項',d:'船上會有水花，建議帶薄外套或輕便雨衣；貴重物品用防水袋裝。出發時間要抓早一點'},
+    {t:'中午',h:'嵐山',d:'下船後直接逛渡月橋、竹林小徑、嵐山商店街，中餐在嵐山吃'},
+    {t:'下午',h:'金閣寺',d:'隨行程彈性安排。嵐山到金閣寺搭公車約 40 分鐘',q:1},
+    {t:'傍晚',h:'伏見稻荷大社',d:'千本鳥居。免費入場、24 小時開放，傍晚人比較少。全部走完要 2 小時以上，走到半山腰折返就很夠了',d2:1}
+  ],
+  spots:[
+    {n:'龜岡 保津川乘船處',la:35.0140,lo:135.5793},
+    {n:'嵐山 渡月橋',la:35.0130,lo:135.6776},
+    {n:'嵐山 竹林小徑',la:35.0170,lo:135.6714},
+    {n:'金閣寺',la:35.0394,lo:135.7292},
+    {n:'伏見稻荷大社',la:34.9671,lo:135.7727}
+  ]
+},
+{
+  n:7, date:'9/26', dow:'六', color:'#a85a8c',
+  title:'京都北部神社 → 移動大阪 → 道頓堀',
+  area:'貴船・下鴨・京都御苑・心齋橋',
+  stay:'大阪　OYASUMI ICE & HOTEL',
+  items:[
+    {t:'早上',h:'貴船神社',d:'京都北邊山區，水占卜與紅燈籠石階很有名。市區搭叡山電車約 40 分鐘 + 步行或公車。氣溫比市區低 3–5 度，記得帶外套',d2:1},
+    {t:'中午',h:'下鴨神社',d:'世界遺產，境內的糺之森是很舒服的原始林步道'},
+    {t:'下午',h:'京都御苑',d:'舊皇居所在，開闊的大公園，適合慢慢散步'},
+    {t:'傍晚',h:'京都 → 大阪',d:'JR 或阪急，約 30–45 分鐘。抵達後飯店 Check in'},
+    {t:'晚上',h:'心齋橋・道頓堀',d:'固力果跑跑人看板、章魚燒、大螃蟹招牌。逛街吃小吃的大本營'}
+  ],
+  spots:[
+    {n:'貴船神社',la:35.1216,lo:135.7626},
+    {n:'下鴨神社',la:35.0394,lo:135.7728},
+    {n:'京都御苑',la:35.0254,lo:135.7621},
+    {n:'心齋橋',la:34.6718,lo:135.5010},
+    {n:'道頓堀',la:34.6687,lo:135.5013}
+  ]
+},
+{
+  n:8, date:'9/27', dow:'日', color:'#c1553f',
+  title:'大阪市區散步',
+  area:'黑門市場・大阪城・新世界・道頓堀',
+  stay:'大阪　OYASUMI ICE & HOTEL（連住第 2 晚）',
+  items:[
+    {t:'早餐',h:'黑門市場',d:'「大阪的廚房」。生魚片、烤干貝、水果、玉子燒，邊走邊吃。上午去最新鮮'},
+    {t:'上午',h:'大阪城',d:'天守閣可以上去（有電梯），公園腹地很大，走起來輕鬆'},
+    {t:'下午',h:'新世界商店街・通天閣',d:'昭和復古街景，名物是炸串（串カツ）。提醒：醬汁只能沾一次，這是規矩'},
+    {t:'傍晚',h:'回飯店休息',d:'今天走的路多，中間安排回房間休息一下'},
+    {t:'晚上',h:'道頓堀遊船 + 晚餐',d:'河上的觀光船約 20 分鐘，晚上霓虹很漂亮。可現場買票',q:1}
+  ],
+  spots:[
+    {n:'黑門市場',la:34.6653,lo:135.5060},
+    {n:'大阪城',la:34.6873,lo:135.5259},
+    {n:'新世界・通天閣',la:34.6524,lo:135.5063},
+    {n:'道頓堀',la:34.6687,lo:135.5013}
+  ]
+},
+{
+  n:9, date:'9/28', dow:'一', color:'#7a716a',
+  title:'難波 → 臨空城 → 關西機場 → 回家',
+  area:'難波・臨空城・關西機場',
+  stay:'—　當晚紅眼班機返台',
+  items:[
+    {t:'上午',h:'飯店 Check out，行李寄放',d:'可寄放在飯店或車站置物櫃'},
+    {t:'中午',h:'難波吃午餐',d:'吃完就出發前往臨空城'},
+    {t:'下午',h:'臨空城 Rinku Premium Outlets',d:'難波搭南海電鐵約 35 分鐘。最後採買的好機會'},
+    {t:'傍晚',h:'臨空公園 看夕陽・摩天輪',d:'就在 Outlet 旁邊，面向大阪灣，可以看到關西機場。夕陽約 17:50',d2:1},
+    {t:'20:00前',h:'前往關西機場',d:'臨空城到機場只要 1 站、約 6 分鐘'},
+    {t:'21:00前',h:'抵達機場',d:'辦理登機、退稅、逛免稅店、吃晚餐。建議再早一點到比較從容'},
+    {t:'23:35',h:'班機起飛返台',d:''}
+  ],
+  spots:[
+    {n:'難波',la:34.6659,lo:135.5020},
+    {n:'臨空城 Outlet',la:34.4106,lo:135.2997},
+    {n:'臨空公園（夕陽）',la:34.4085,lo:135.2946},
+    {n:'關西機場',la:34.4342,lo:135.2328}
+  ]
+}];
+
+const HOTELS = [
+  {d:'9/20–9/21', n:'一間茶旅館', c:'高山', s:'Agoda 已付　NT$5,617', q:0},
+  {d:'9/22', n:'まひるのつき（夕日が海に沈む宿）', c:'能登島', s:'Booking　NT$4,922（9/15 扣款）', q:1},
+  {d:'9/23', n:'高級溫泉飯店（一泊二食）', c:'加賀溫泉', s:'日本官網已付　約 NT$8,300', q:1},
+  {d:'9/24–9/25', n:'京都 M\u2019s 飯店', c:'京都', s:'Agoda 已付　NT$4,445（不可取消）', q:1},
+  {d:'9/26–9/27', n:'OYASUMI ICE & HOTEL', c:'大阪', s:'Booking 已訂　NT$6,543', q:1}
+];
+
+const TODOS = [
+  {k:'日期', v:'原本的行程表 9/23 之後有跳號，已依星期重新對齊（嵐山遊船改為 9/25）', s:'請再確認 KKday 遊船訂單上的日期是 9/24 還是 9/25'},
+  {k:'住宿', v:'加賀溫泉是訂哪一家溫泉飯店？', s:'目前地圖標在山代溫泉一帶，確認後會更新'},
+  {k:'住宿', v:'京都 M\u2019s 飯店是哪一間分館？', s:'M\u2019s 系列在京都有好幾間（四条大宮、祇園等）'},
+  {k:'住宿', v:'大阪 OYASUMI ICE & HOTEL 的實際位置？', s:'目前先標在難波一帶'},
+  {k:'住宿', v:'能登島民宿的正確地址', s:'地圖上的位置是概略值'},
+  {k:'吃飯', v:'9/20 小松午餐、9/21 高山晚餐、9/22 羽咋午餐、9/24 京都晚餐', s:'都還沒選店'},
+  {k:'行程', v:'9/24 是否確定要停福井看恐龍、吃醬汁豬排丼？', s:'原筆記寫「龍井」，推測是福井車站'},
+  {k:'行程', v:'9/23 小松的蛋糕店是哪一家？'},
+  {k:'行程', v:'9/25 金閣寺是否要排入？', s:'原筆記寫「隨意」'},
+  {k:'行程', v:'9/27 道頓堀遊船要不要先訂？', s:'現場買票通常也買得到'}
+];
+
+const BOOKED = [
+  {k:'機票', v:'去程 2 人 NT$18,100（易遊網）／ 回程 3 人 NT$18,210（Trip.com）', s:'皆已付款'},
+  {k:'租車', v:'9/20–9/23 小松機場　NT$5,419（Klook，含基本險）', s:'已付款'},
+  {k:'體驗', v:'9/25 保津川遊船 10:00　NT$3,573（KKday）', s:'已訂'},
+  {k:'住宿', v:'5 間住宿全數已訂，合計約 NT$29,827', s:'詳見「住宿・交通」分頁'}
+];
+
+/* ══════════════════════════════════════════ */
+const el = (h)=>{const d=document.createElement('div');d.innerHTML=h.trim();return d.firstChild};
+const esc = (s)=>String(s).replace(/[&<>]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;'}[c]));
+
+/* 行程卡片 */
+document.getElementById('days').innerHTML = DAYS.map(d=>`
+  <div class="day">
+    <div class="day-head">
+      <div class="badge" style="background:${d.color}"><b>${d.date}</b><span>週${d.dow}</span></div>
+      <div class="t"><h3>${esc(d.title)}</h3><p>Day ${d.n}　·　${esc(d.area)}</p></div>
+    </div>
+    <div class="day-body"><ul class="tl">
+      ${d.items.map(i=>`<li>
+        ${i.t?`<div class="time">${esc(i.t)}</div>`:''}
+        <div class="ttl">${esc(i.h)}${i.q?'<span class="tag q">待確認</span>':''}${i.b?'<span class="tag b">已訂</span>':''}</div>
+        ${i.d?`<div class="desc">${esc(i.d)}</div>`:''}
+      </li>`).join('')}
+    </ul></div>
+    <div class="stay">🛏️ <b>住</b>　${esc(d.stay)}</div>
+  </div>`).join('');
+
+/* 住宿 / 待確認 / 已訂 */
+document.getElementById('hotels').innerHTML = HOTELS.map(h=>`
+  <div class="row"><div class="k">${h.d}</div><div class="v">${esc(h.n)}${h.q?'<span class="tag q">待確認</span>':''}<small>${esc(h.c)}　·　${esc(h.s)}</small></div></div>`).join('');
+document.getElementById('todos').innerHTML = TODOS.map(t=>`
+  <div class="row"><div class="k">${t.k}</div><div class="v">${esc(t.v)}${t.s?`<small>${esc(t.s)}</small>`:''}</div></div>`).join('');
+document.getElementById('booked').innerHTML = BOOKED.map(t=>`
+  <div class="row"><div class="k">${t.k}</div><div class="v">${esc(t.v)}${t.s?`<small>${esc(t.s)}</small>`:''}</div></div>`).join('');
+document.getElementById('areas').innerHTML = DAYS.map(d=>`
+  <div class="row"><div class="k" style="color:${d.color}">${d.date} 週${d.dow}</div>
+  <div class="v">${esc(d.area)}<small>${esc(d.title)}</small></div></div>`).join('');
+
+/* 分頁切換 */
+const secs={plan:'plan',map:'map-sec',stay:'stay',pack:'pack',todo:'todo'};
+document.querySelectorAll('nav button').forEach(b=>b.onclick=()=>{
+  document.querySelectorAll('nav button').forEach(x=>x.classList.toggle('on',x===b));
+  Object.values(secs).forEach(id=>document.getElementById(id).classList.remove('on'));
+  document.getElementById(secs[b.dataset.s]).classList.add('on');
+  window.scrollTo(0,0);
+  if(b.dataset.s==='map') setTimeout(()=>{map.invalidateSize();fitActive()},80);
+});
+
+/* 地圖 */
+const map = L.map('map',{scrollWheelZoom:false}).setView([36.2,136.6],7);
+L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png',{
+  attribution:'&copy; OpenStreetMap', maxZoom:18}).addTo(map);
+
+const layers={};
+DAYS.forEach(d=>{
+  const g=L.layerGroup().addTo(map);
+  const pts=[];
+  d.spots.forEach((s,i)=>{
+    pts.push([s.la,s.lo]);
+    L.marker([s.la,s.lo],{icon:L.divIcon({className:'',
+      html:`<div class="pin" style="background:${d.color};width:26px;height:26px">${d.n}</div>`,
+      iconSize:[26,26],iconAnchor:[13,13]})})
+     .bindPopup(`<b>${esc(s.n)}</b><small>${d.date}（週${d.dow}）Day ${d.n}<br>${esc(d.area)}</small>`)
+     .addTo(g);
+  });
+  if(pts.length>1) L.polyline(pts,{color:d.color,weight:3,opacity:.55,dashArray:'6 6'}).addTo(g);
+  layers[d.n]=g;
+});
+const allBounds = L.latLngBounds(DAYS.flatMap(d=>d.spots.map(s=>[s.la,s.lo])));
+
+let active=0;
+function fitActive(){
+  if(active===0){ map.fitBounds(allBounds,{padding:[30,30]}); return; }
+  const d=DAYS.find(x=>x.n===active);
+  map.fitBounds(L.latLngBounds(d.spots.map(s=>[s.la,s.lo])),{padding:[50,50],maxZoom:12});
+}
+
+const chips=document.getElementById('chips');
+chips.appendChild(el(`<button class="on" style="background:#2b2622" data-n="0">全部</button>`));
+DAYS.forEach(d=>chips.appendChild(el(
+  `<button style="background:${d.color}" data-n="${d.n}">${d.date}</button>`)));
+chips.querySelectorAll('button').forEach(b=>b.onclick=()=>{
+  active=+b.dataset.n;
+  chips.querySelectorAll('button').forEach(x=>x.classList.toggle('on',x===b));
+  DAYS.forEach(d=>{
+    const on = active===0 || active===d.n;
+    on ? layers[d.n].addTo(map) : map.removeLayer(layers[d.n]);
+  });
+  fitActive();
+});
+
+/* 倒數 */
+const go=new Date('2026-09-20T06:35:00+08:00'), now=new Date();
+const dd=Math.ceil((go-now)/86400000);
+document.getElementById('countdown').textContent =
+  dd>0 ? `還有 ${dd} 天出發 ✈️` : (dd>-9 ? '旅程進行中 ✈️' : '旅程回顧');
+document.getElementById('upd').textContent = new Date(document.lastModified)
+  .toLocaleDateString('zh-TW',{year:'numeric',month:'long',day:'numeric'});
+</script>
+</body>
+</html>
